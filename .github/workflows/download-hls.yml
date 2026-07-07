@@ -1,0 +1,39 @@
+name: Download HLS to MP4
+
+on:
+  workflow_dispatch: # Mengizinkan trigger manual dari tab "Actions" di Github
+
+jobs:
+  download-videos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Menggunakan Node.js v20
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Initialize package.json & set type module
+        # Karena kita pakai "import" / ES Modules, package.json butuh "type": "module"
+        run: |
+          echo '{"type": "module"}' > package.json
+
+      - name: Run Downloader Script
+        run: node index.js
+
+      - name: Upload Videos as Artifacts
+        # Ini penting agar hasil video .mp4 bisa kamu download setelah proses selesai
+        uses: actions/upload-artifact@v4
+        with:
+          name: Downloaded-Videos
+          path: '*.mp4'
+          retention-days: 1 # File akan disimpan di Github selama 1 hari (bisa diubah max 90)
+          
